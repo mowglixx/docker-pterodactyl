@@ -1,0 +1,67 @@
+services:
+  database:
+  image: library/mysql:8.0
+  restart: always
+  networks:
+    - local
+  command: --default-authentication-plugin=mysql_native_password
+  volumes:
+    - "${SERVERS_DATA_FULL_PATH}/database:/var/lib/mysql"
+  env_file:
+    - ../.env
+  cache:
+    image: redis:alpine
+    restart: always
+    networks:
+      - local
+
+  panel:
+    image: ghcr.io/pterodactyl/panel:v1.6.2
+    restart: always
+    networks:
+      - pterodactyl
+      - local
+    links:
+      - database
+      - cache
+    env_file:
+      - ../.env
+    volumes:
+      - "${DATA_DIR}/panel/var/:/app/var/"
+      - "${DATA_DIR}/panel/logs/:/app/storage/logs"
+      - "${DATA_DIR}/panel/nginx/:/etc/nginx/conf.d/"
+  wings:
+    image: ghcr.io/pterodactyl/wings:v1.5.1
+    env_file:
+      - .env
+      - domains.env
+    restart: always
+    networks:
+      - pterodactyl
+      - wings0
+    ports:
+      - "2022:2022"
+    tty: true
+    environment:
+      TZ: "UTC"
+      WINGS_UID: 988
+      WINGS_GID: 988
+      WINGS_USERNAME: pterodactyl
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/var/lib/docker/containers:/var/lib/docker/containers"
+      - "/tmp/pterodactyl:/tmp/pterodactyl"
+      - "/etc/ssl/certs:/etc/ssl/certs:ro"
+      - "./config:/etc/pterodactyl"
+      - "${DATA_DIR}/wings/logs:/var/log/pterodactyl"
+      - "${SERVERS_DATA_FULL_PATH}/pterodactyl:/var/lib/pterodactyl"
+
+networks:
+  local:
+    external: false
+  pterodactyl:
+    external: true
+  default:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
