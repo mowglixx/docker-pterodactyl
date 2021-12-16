@@ -43,7 +43,7 @@ Navigate to `panel/compose/docker-compose.yml` and set these variables
 |-|:-:|-|
 | MYSQL_ROOT_PASSWORD | - | Use a password generator to create a strong password |
 | MYSQL_PASSWORD | - | Don't reuse your root's password for this, generate a new one |
-| APP_URL | https://panel.example.com | Same as `PANEL_DOMAIN` but with `https://` included|
+| APP_URL | `https://panel.example.com` | Same as `PANEL_DOMAIN` but with `https://` included|
 
 Rest of the variables can be set as desired, these three are required for panel's basic functionality.
 
